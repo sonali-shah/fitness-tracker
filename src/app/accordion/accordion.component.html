@@ -1,0 +1,15 @@
+<div class="accordion">
+  <ng-container *ngFor="let section of sections; let i = index">
+    <div class="accordion-section" [class.open]="section.open" (click)="toggleSection(i)">
+      <div class="accordion-header">
+        <span class="accordion-icon">{{ section.open ? '-' : '+' }}</span>
+        <!-- <ng-content select="[accordion-title]"></ng-content> -->
+        <div>{{section.title}}</div>
+      </div>
+      <div class="accordion-body" [hidden]="!section.open">
+        <!-- <ng-content select="[accordion-body]"></ng-content> -->
+        <div>{{section.body}}</div>
+      </div>
+    </div>
+  </ng-container>
+</div>

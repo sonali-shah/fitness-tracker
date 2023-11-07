@@ -1,0 +1,7 @@
+<div class="star-rating">
+  <span (click)="rate(1)" [class.active]="rating >= 1">&#9733;</span>
+  <span (click)="rate(2)" [class.active]="rating >= 2">&#9733;</span>
+  <span (click)="rate(3)" [class.active]="rating >= 3">&#9733;</span>
+  <span (click)="rate(4)" [class.active]="rating >= 4">&#9733;</span>
+  <span (click)="rate(5)" [class.active]="rating === 5">&#9733;</span>
+</div>

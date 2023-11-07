@@ -1,0 +1,51 @@
+<!-- app.component.html -->
+<!-- tool bar -->
+<app-toolbar [title]="'My Custom Toolbar'">
+  <button>Button 1</button>
+  <button>Button 2</button>
+</app-toolbar>
+<!-- Card -->
+<app-card [title]="'Sample Card'" [subtitle]="'Subtitle'" [showFooter]="true">
+  <div card-icon>
+    <i class="fas fa-star"></i>
+  </div>
+  <div card-body>
+    <!-- <p [ngClass]="{'primary':isPrimary, 'secondary': !isPrimary}">This is the card body content.</p> -->
+    <p [class.primary-text]="isPrimary" [class.secondary-text]="!isPrimary">This is the card body content.</p>
+  </div>
+  <div card-footer>
+    <button class="btn btn-primary">Submit</button>
+    <button class="btn btn-secondary">Cancel</button>
+  </div>
+</app-card>
+<!-- accordion -->
+<app-accordion [sections]="accordionSections">
+  <div accordion-title>
+    Title 1
+  </div>
+  <div accordion-body>
+    Body 1
+  </div>
+</app-accordion>
+<!-- Credit card formatter pipe -->
+<div>
+  {{ '1234 5678 9012 3456' | creditCard }} <!-- Invalid, will throw an error -->
+</div>
+<div>
+  {{ '1234567890123456' | creditCard }} <!-- 1234-5678-9012-3456 -->
+</div>
+<!-- star rating -->
+<app-star-rating [rating]="4.5"></app-star-rating>
+
+<div>
+  <h1>Product List</h1>
+  <select (change)="filterProducts($event)">
+    <option value="">All Categories</option>
+    <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+  </select>
+  <div *ngFor="let product of filteredProducts">
+    <div>{{ product.name }}</div>
+    <div>{{ product.category }}</div>
+    <div>{{ product.price | currency }}</div>
+  </div>
+</div>
