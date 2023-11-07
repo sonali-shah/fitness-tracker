@@ -1,39 +1,66 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { Subject } from 'rxjs';
+import {
+  Auth,
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from '@angular/fire/auth';
+
 import { AuthData } from './auth-data.model';
 import { User } from './user.model';
-import { Subject } from 'rxjs';
 
 @Injectable()
 export class AuthService {
-
-  constructor(private router: Router) {}
+  constructor(private router: Router, private afAuth: Auth) {
+    onAuthStateChanged(this.afAuth, (userData: any) => {
+      if (userData) {
+        this.user = userData;
+        console.log(userData);
+        this.authChange.next(true);
+        this.router.navigateByUrl('training');
+      } else {
+        this.authChange.next(false);
+        this.router.navigateByUrl('login');
+      }
+    });
+  }
 
   authChange: Subject<boolean> = new Subject<boolean>();
   private user: User | null = null;
 
   registerUser(authData: AuthData) {
-    this.user = {
-      email: authData.email,
-      userId: Math.round(Math.random() * 10000).toString(),
-    };
-    
-    this.authSuccessfully();
+    createUserWithEmailAndPassword(
+      this.afAuth,
+      authData.email,
+      authData.password
+    )
+      .then((result) => {
+        this.router.navigateByUrl('login');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   login(authData: AuthData) {
-    this.user = {
-      email: authData.email,
-      userId: Math.round(Math.random() * 10000).toString(),
-    };
-
-    this.authSuccessfully();
+    signInWithEmailAndPassword(this.afAuth, authData.email, authData.password)
+      .then((result) => {
+        this.authChange.next(true);
+        this.router.navigateByUrl('training');
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
 
   logout() {
-    this.user = null;
-    this.authChange.next(false);
-    this.router.navigateByUrl('login');
+    signOut(this.afAuth).then(() => {
+      this.authChange.next(false);
+      this.router.navigateByUrl('login');
+    })
   }
 
   getUser() {
@@ -42,10 +69,5 @@ export class AuthService {
 
   isAuth() {
     return this.user != null;
-  }
-
-  authSuccessfully() {
-    this.authChange.next(true);
-    this.router.navigateByUrl('training');
   }
 }

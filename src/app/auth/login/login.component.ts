@@ -22,10 +22,9 @@ export class LoginComponent implements OnInit {
 
 
   onLoginFormSubmit() {
-    console.log(this.loginForm);
     this.authService.login({
-      email: this.loginForm.email,
-      password: this.loginForm.password
+      email: this.loginForm.controls.email.value,
+      password: this.loginForm.controls.password.value
     });
   }
 }
