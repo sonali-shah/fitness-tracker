@@ -31,6 +31,7 @@ import { CardComponent } from './card/card.component';
 import { AccordionComponent } from './accordion/accordion.component';
 import { CreditCardPipe } from './utility/credit-card.pipe';
 import { StarRatingComponent } from './star-rating/star-rating.component';
+import { UIService } from './shared/ui.service';
 
 @NgModule({
   declarations: [
@@ -65,7 +66,7 @@ import { StarRatingComponent } from './star-rating/star-rating.component';
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore())
   ],
-  providers: [AuthService, TrainingService, ProductService],
+  providers: [AuthService, TrainingService, ProductService, UIService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

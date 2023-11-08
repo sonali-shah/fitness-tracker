@@ -8,13 +8,19 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from '@angular/fire/auth';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthData } from './auth-data.model';
 import { User } from './user.model';
+import { UIService } from '../shared/ui.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private router: Router, private afAuth: Auth) {
+  constructor(
+    private router: Router,
+    private afAuth: Auth,
+    private matSnackBar: MatSnackBar,
+    private uiService: UIService
+  ) {
     onAuthStateChanged(this.afAuth, (userData: any) => {
       if (userData) {
         this.user = userData;
@@ -32,27 +38,37 @@ export class AuthService {
   private user: User | null = null;
 
   registerUser(authData: AuthData) {
+    this.uiService.loadingStateChanged.next(true);
     createUserWithEmailAndPassword(
       this.afAuth,
       authData.email,
       authData.password
     )
       .then((result) => {
+        this.uiService.loadingStateChanged.next(false);
         this.router.navigateByUrl('login');
       })
       .catch((error) => {
-        console.log(error);
+        this.uiService.loadingStateChanged.next(false);
+        this.matSnackBar.open(error.message, 'Close', {
+          duration: 3000
+        })
       });
   }
 
   login(authData: AuthData) {
+    this.uiService.loadingStateChanged.next(true);
     signInWithEmailAndPassword(this.afAuth, authData.email, authData.password)
       .then((result) => {
+        this.uiService.loadingStateChanged.next(false);
         this.authChange.next(true);
         this.router.navigateByUrl('training');
       })
       .catch((error) => {
-        console.log(error);
+        this.uiService.loadingStateChanged.next(false);
+        this.matSnackBar.open(error.message, undefined, {
+          duration: 3000
+        })
       });
   }
 
@@ -60,7 +76,7 @@ export class AuthService {
     signOut(this.afAuth).then(() => {
       this.authChange.next(false);
       this.router.navigateByUrl('login');
-    })
+    });
   }
 
   getUser() {
