@@ -22,6 +22,6 @@ Paginator,
 SnackBar
 
 # Used Angular concepts
-canMatchFn for Authguard
-Lazy loading module
+canMatchFn for Authguard, 
+Lazy loading module, 
 Child routes
