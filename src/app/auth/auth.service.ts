@@ -18,7 +18,6 @@ export class AuthService {
   constructor(
     private router: Router,
     private afAuth: Auth,
-    private matSnackBar: MatSnackBar,
     private uiService: UIService
   ) {
     onAuthStateChanged(this.afAuth, (userData: any) => {
@@ -50,7 +49,7 @@ export class AuthService {
       })
       .catch((error) => {
         this.uiService.loadingStateChanged.next(false);
-        this.matSnackBar.open(error.message, 'Close', {
+        this.uiService.showSnackBar(error.message, 'Close', {
           duration: 3000
         })
       });
@@ -66,7 +65,7 @@ export class AuthService {
       })
       .catch((error) => {
         this.uiService.loadingStateChanged.next(false);
-        this.matSnackBar.open(error.message, undefined, {
+        this.uiService.showSnackBar(error.message, undefined, {
           duration: 3000
         })
       });
