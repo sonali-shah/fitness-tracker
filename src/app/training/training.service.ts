@@ -1,7 +1,13 @@
 import { Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Exercise } from './exercise.model';
-import { Firestore, addDoc, collection, collectionData, getDocs } from '@angular/fire/firestore';
+import {
+  Firestore,
+  addDoc,
+  collection,
+  getDocs,
+} from '@angular/fire/firestore';
+import { UIService } from '../shared/ui.service';
 
 @Injectable()
 export class TrainingService {
@@ -10,27 +16,45 @@ export class TrainingService {
   private runningExercise: Exercise | undefined;
   private exercises: Exercise[] = [];
 
-  availableExercisesChanged: Subject<any> = new Subject<any>();
+  availableExercisesChanged: Subject<Exercise[] | undefined> = new Subject<
+    Exercise[] | undefined
+  >();
   finishedExercisesChanged: Subject<any> = new Subject<any>();
   exerciseChanged: Subject<Exercise | undefined> = new Subject<
     Exercise | undefined
   >();
 
-  constructor(private db: Firestore) {}
+  constructor(private db: Firestore, private uiService: UIService) {}
 
   fetchAvailableExercises() {
-    const availableExercisesCollection = collection(this.db, 'availableExercises');
-    getDocs(availableExercisesCollection).then((result => {
-      this.availableExercises = result.docs.map((doc) => {
-        return { 
-          name: doc.data()['name'], 
-          duration: doc.data()['duration'],
-          calories: doc.data()['calories'],
-          id: doc.id
-        };
+    this.uiService.loadingStateChanged.next(true);
+    const availableExercisesCollection = collection(
+      this.db,
+      'availableExercises'
+    );
+    getDocs(availableExercisesCollection)
+      .then((result) => {
+        this.uiService.loadingStateChanged.next(false);
+        this.availableExercises = result.docs.map((doc) => {
+          return {
+            name: doc.data()['name'],
+            duration: doc.data()['duration'],
+            calories: doc.data()['calories'],
+            id: doc.id
+          };
+        });
+        this.availableExercisesChanged.next([...this.availableExercises]);
       })
-      this.availableExercisesChanged.next(true);
-    }))
+      .catch(() => {
+        this.uiService.loadingStateChanged.next(false);
+        this.uiService.showSnackBar(
+          'Fetching exercise is failed. Please try again',
+          undefined,
+          { duration: 3000 }
+        );
+
+        this.availableExercisesChanged.next(undefined);
+      });
   }
 
   getAvailableExercises() {
@@ -78,18 +102,21 @@ export class TrainingService {
   }
 
   fetchCompletedOrCancelledExercises() {
-    const finishedExercisesCollection = collection(this.db, 'finishedExercises');
+    const finishedExercisesCollection = collection(
+      this.db,
+      'finishedExercises'
+    );
     getDocs(finishedExercisesCollection).then((result) => {
-      this.exercises = result.docs.map(doc => {
-        return { 
-          name: doc.data()['name'], 
+      this.exercises = result.docs.map((doc) => {
+        return {
+          name: doc.data()['name'],
           duration: doc.data()['duration'],
           calories: doc.data()['calories'],
-          id: doc.id
+          id: doc.id,
         };
-      })
+      });
       this.finishedExercisesChanged.next(true);
-    })
+    });
   }
 
   getCompletedOrCancelledExercises() {
@@ -97,8 +124,10 @@ export class TrainingService {
   }
 
   addDataToDatabase(exercise: Exercise) {
-    const finishedExercisesCollection = collection(this.db, 'finishedExercises');
+    const finishedExercisesCollection = collection(
+      this.db,
+      'finishedExercises'
+    );
     addDoc(finishedExercisesCollection, exercise);
   }
-
 }
