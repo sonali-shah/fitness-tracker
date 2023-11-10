@@ -8,17 +8,21 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from '@angular/fire/auth';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Store } from '@ngrx/store';
+
 import { AuthData } from './auth-data.model';
 import { User } from './user.model';
 import { UIService } from '../shared/ui.service';
+import * as fromRoot from '../app.reducer';
+import * as UI from '../shared/ui.actions';
 
 @Injectable()
 export class AuthService {
   constructor(
     private router: Router,
     private afAuth: Auth,
-    private uiService: UIService
+    private uiService: UIService,
+    private store: Store<fromRoot.State>
   ) {
     onAuthStateChanged(this.afAuth, (userData: any) => {
       if (userData) {
@@ -37,37 +41,37 @@ export class AuthService {
   private user: User | null = null;
 
   registerUser(authData: AuthData) {
-    this.uiService.loadingStateChanged.next(true);
+    this.store.dispatch(new UI.StartLoading());
     createUserWithEmailAndPassword(
       this.afAuth,
       authData.email,
       authData.password
     )
       .then((result) => {
-        this.uiService.loadingStateChanged.next(false);
+        this.store.dispatch(new UI.StopLoading());
         this.router.navigateByUrl('login');
       })
       .catch((error) => {
-        this.uiService.loadingStateChanged.next(false);
+        this.store.dispatch(new UI.StopLoading());
         this.uiService.showSnackBar(error.message, 'Close', {
-          duration: 3000
-        })
+          duration: 3000,
+        });
       });
   }
 
   login(authData: AuthData) {
-    this.uiService.loadingStateChanged.next(true);
+    this.store.dispatch(new UI.StartLoading());
     signInWithEmailAndPassword(this.afAuth, authData.email, authData.password)
       .then((result) => {
-        this.uiService.loadingStateChanged.next(false);
+        this.store.dispatch(new UI.StopLoading());
         this.authChange.next(true);
         this.router.navigateByUrl('training');
       })
       .catch((error) => {
-        this.uiService.loadingStateChanged.next(false);
+        this.store.dispatch(new UI.StopLoading());
         this.uiService.showSnackBar(error.message, undefined, {
-          duration: 3000
-        })
+          duration: 3000,
+        });
       });
   }
 

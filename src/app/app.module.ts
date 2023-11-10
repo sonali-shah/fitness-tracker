@@ -27,6 +27,8 @@ import { StarRatingComponent } from './star-rating/star-rating.component';
 import { UIService } from './shared/ui.service';
 import { AuthModule } from './auth/auth.module';
 import { TrainingModule } from './training/training.module';
+import { StoreModule } from '@ngrx/store';
+import { reducers } from './app.reducer';
 
 @NgModule({
   declarations: [
@@ -54,7 +56,8 @@ import { TrainingModule } from './training/training.module';
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     AuthModule,
-    TrainingModule
+    TrainingModule,
+    StoreModule.forRoot(reducers)
   ],
   providers: [AuthService, TrainingService, ProductService, UIService],
   bootstrap: [AppComponent]

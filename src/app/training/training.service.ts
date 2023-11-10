@@ -7,7 +7,11 @@ import {
   collection,
   getDocs,
 } from '@angular/fire/firestore';
+import { Store } from '@ngrx/store';
+
 import { UIService } from '../shared/ui.service';
+import * as fromRoot from '../app.reducer';
+import * as UI from '../shared/ui.actions';
 
 @Injectable()
 export class TrainingService {
@@ -24,29 +28,33 @@ export class TrainingService {
     Exercise | undefined
   >();
 
-  constructor(private db: Firestore, private uiService: UIService) {}
+  constructor(
+    private db: Firestore,
+    private uiService: UIService,
+    private store: Store<fromRoot.State>
+  ) {}
 
   fetchAvailableExercises() {
-    this.uiService.loadingStateChanged.next(true);
+    this.store.dispatch(new UI.StartLoading());
     const availableExercisesCollection = collection(
       this.db,
       'availableExercises'
     );
     getDocs(availableExercisesCollection)
       .then((result) => {
-        this.uiService.loadingStateChanged.next(false);
+        this.store.dispatch(new UI.StopLoading());
         this.availableExercises = result.docs.map((doc) => {
           return {
             name: doc.data()['name'],
             duration: doc.data()['duration'],
             calories: doc.data()['calories'],
-            id: doc.id
+            id: doc.id,
           };
         });
         this.availableExercisesChanged.next([...this.availableExercises]);
       })
       .catch(() => {
-        this.uiService.loadingStateChanged.next(false);
+        this.store.dispatch(new UI.StopLoading());
         this.uiService.showSnackBar(
           'Fetching exercise is failed. Please try again',
           undefined,
