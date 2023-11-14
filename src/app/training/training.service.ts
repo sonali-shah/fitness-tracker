@@ -1,4 +1,3 @@
-import { Subject } from 'rxjs';
 import { Injectable } from '@angular/core';
 import { Exercise } from './exercise.model';
 import {
@@ -10,8 +9,10 @@ import {
 import { Store } from '@ngrx/store';
 
 import { UIService } from '../shared/ui.service';
-import * as fromRoot from '../app.reducer';
+import * as fromTraining from '../training/training.reducer';
 import * as UI from '../shared/ui.actions';
+import * as Training from '../training/training.actions';
+import { take } from 'rxjs';
 
 @Injectable()
 export class TrainingService {
@@ -20,18 +21,10 @@ export class TrainingService {
   private runningExercise: Exercise | undefined;
   private exercises: Exercise[] = [];
 
-  availableExercisesChanged: Subject<Exercise[] | undefined> = new Subject<
-    Exercise[] | undefined
-  >();
-  finishedExercisesChanged: Subject<any> = new Subject<any>();
-  exerciseChanged: Subject<Exercise | undefined> = new Subject<
-    Exercise | undefined
-  >();
-
   constructor(
     private db: Firestore,
     private uiService: UIService,
-    private store: Store<fromRoot.State>
+    private store: Store<fromTraining.State>
   ) {}
 
   fetchAvailableExercises() {
@@ -51,7 +44,7 @@ export class TrainingService {
             id: doc.id,
           };
         });
-        this.availableExercisesChanged.next([...this.availableExercises]);
+        this.store.dispatch(new Training.AvailableExercises([...this.availableExercises]));
       })
       .catch(() => {
         this.store.dispatch(new UI.StopLoading());
@@ -59,9 +52,9 @@ export class TrainingService {
           'Fetching exercise is failed. Please try again',
           undefined,
           { duration: 3000 }
-        );
-
-        this.availableExercisesChanged.next(undefined);
+          );
+          
+        this.store.dispatch(new Training.AvailableExercises([]));
       });
   }
 
@@ -74,39 +67,36 @@ export class TrainingService {
   }
 
   startExercise(exerciseId: string) {
-    this.runningExercise = this.availableExercises.find(
-      (ex) => ex.id == exerciseId
-    );
-    if (this.runningExercise) {
-      this.exerciseChanged.next({ ...this.runningExercise });
-    }
+    this.store.dispatch(new Training.StartExercise(exerciseId));
   }
 
   completeExercise() {
-    if (this.runningExercise) {
-      this.addDataToDatabase({
-        ...this.runningExercise,
-        date: new Date(),
-        state: 'completed',
-      });
-      this.runningExercise = undefined;
-      this.exerciseChanged.next(undefined);
-    }
+    this.store.select(fromTraining.getActiveTraining).pipe(take(1)).subscribe((ex) => {
+      if (ex) {
+        this.addDataToDatabase({
+          ...ex,
+          date: new Date(),
+          state: 'completed',
+        });
+        this.store.dispatch(new Training.StopExercise());
+      }
+    })
   }
-
+  
   cancelExercise(progress: number) {
-    if (this.runningExercise) {
-      this.addDataToDatabase({
-        ...this.runningExercise,
-        date: new Date(),
-        duration: this.runningExercise.duration * (progress / 100),
-        calories: this.runningExercise.calories * (progress / 100),
-        state: 'cancelled',
-      });
-
-      this.runningExercise = undefined;
-      this.exerciseChanged.next(undefined);
-    }
+    this.store.select(fromTraining.getActiveTraining).pipe(take(1)).subscribe((ex) => {
+      if (ex) {
+        this.addDataToDatabase({
+          ...ex,
+          date: new Date(),
+          duration: ex.duration * (progress / 100),
+          calories: ex.calories * (progress / 100),
+          state: 'cancelled',
+        });
+        
+        this.store.dispatch(new Training.StopExercise());
+      }
+    });
   }
 
   fetchCompletedOrCancelledExercises() {
@@ -116,14 +106,18 @@ export class TrainingService {
     );
     getDocs(finishedExercisesCollection).then((result) => {
       this.exercises = result.docs.map((doc) => {
+        let date: Date = new Date(1970, 0, 1);
+        date.setSeconds(doc.data()['date']['seconds']);
         return {
           name: doc.data()['name'],
           duration: doc.data()['duration'],
           calories: doc.data()['calories'],
+          date: date,
+          state: doc.data()['state'],
           id: doc.id,
         };
       });
-      this.finishedExercisesChanged.next(true);
+      this.store.dispatch(new Training.FinishedExercise(this.exercises));
     });
   }
 

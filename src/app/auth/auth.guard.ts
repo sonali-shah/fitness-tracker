@@ -1,14 +1,11 @@
 import { inject } from '@angular/core';
-import { AuthService } from './auth.service';
-import { Router } from '@angular/router';
+import { Store } from '@ngrx/store';
+import { take } from 'rxjs';
+
+import * as fromRoot from '../app.reducer';
 
 export const authGuard = () => {
-  const authService: AuthService = inject(AuthService);
-  const router: Router = inject(Router);
+  const store: Store = inject(Store<fromRoot.State>);
 
-  if (authService.isAuth()) {
-    return true;
-  } else {
-    return router.parseUrl('login');
-  }
+  return store.select(fromRoot.getIsAuth).pipe(take(1));
 };

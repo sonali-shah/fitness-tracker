@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
 import {
   Auth,
   createUserWithEmailAndPassword,
@@ -15,6 +14,7 @@ import { User } from './user.model';
 import { UIService } from '../shared/ui.service';
 import * as fromRoot from '../app.reducer';
 import * as UI from '../shared/ui.actions';
+import * as AuthActions from '../auth/auth.actions';
 
 @Injectable()
 export class AuthService {
@@ -27,17 +27,15 @@ export class AuthService {
     onAuthStateChanged(this.afAuth, (userData: any) => {
       if (userData) {
         this.user = userData;
-        console.log(userData);
-        this.authChange.next(true);
+        this.store.dispatch(new AuthActions.SetAuthenticated());
         this.router.navigateByUrl('training');
       } else {
-        this.authChange.next(false);
+        this.store.dispatch(new AuthActions.SetUnaunthenticated());
         this.router.navigateByUrl('login');
       }
     });
   }
 
-  authChange: Subject<boolean> = new Subject<boolean>();
   private user: User | null = null;
 
   registerUser(authData: AuthData) {
@@ -64,11 +62,12 @@ export class AuthService {
     signInWithEmailAndPassword(this.afAuth, authData.email, authData.password)
       .then((result) => {
         this.store.dispatch(new UI.StopLoading());
-        this.authChange.next(true);
-        this.router.navigateByUrl('training');
+        this.store.dispatch(new AuthActions.SetAuthenticated());
+        // this.router.navigateByUrl('training');
       })
       .catch((error) => {
         this.store.dispatch(new UI.StopLoading());
+        this.store.dispatch(new AuthActions.SetUnaunthenticated());
         this.uiService.showSnackBar(error.message, undefined, {
           duration: 3000,
         });
@@ -77,7 +76,7 @@ export class AuthService {
 
   logout() {
     signOut(this.afAuth).then(() => {
-      this.authChange.next(false);
+      this.store.dispatch(new AuthActions.SetUnaunthenticated());
       this.router.navigateByUrl('login');
     });
   }

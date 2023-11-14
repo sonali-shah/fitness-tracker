@@ -9,7 +9,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { StopTrainingComponent } from './current-training/stop-training.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { StoreModule } from '@ngrx/store';
+
 import { TrainingRoutingModule } from './training.routing.module';
+import { trainingReducer } from './training.reducer';
 
 @NgModule({
   declarations: [
@@ -24,7 +27,8 @@ import { TrainingRoutingModule } from './training.routing.module';
     FlexLayoutModule,
     MaterialModule,
     FormsModule,
-    TrainingRoutingModule
+    TrainingRoutingModule,
+    StoreModule.forFeature('training', trainingReducer)
   ],
   exports: []
 })
