@@ -20,11 +20,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v1
 
-      - name: Install and build
-        run: npm install && npm run gh-build
+      - name: setup git config
+        run: |
+          git config user.name "Sonali Shah"
+          git config user.email "sonusukhadia@gmail.com"
 
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.1
-        with: 
-          branch: gh-pages
-          folder: dist
+      - name: setup deployment
+        run: |
+          npm install
+          rm -rf dist
+          npm run gh-build
+          git add dist -f
+          git commit -m "build files from github action"
+          git push
