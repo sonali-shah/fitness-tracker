@@ -28,9 +28,9 @@ jobs:
       - name: setup deployment
         run: |
           npm install
+          git checkout main
           rm -rf dist
           npm run build
           git add dist -f
           git commit -m "build files from github action"
-          git branch -a
           git push
