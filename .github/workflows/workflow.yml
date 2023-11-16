@@ -32,4 +32,5 @@ jobs:
           npm run gh-build
           git add dist -f
           git commit -m "build files from github action"
+          git log
           git push
