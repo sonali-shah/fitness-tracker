@@ -22,8 +22,8 @@ jobs:
 
       - name: setup git config
         run: |
-          git config user.name "Sonali Shah"
-          git config user.email "sonusukhadia@gmail.com"
+          git config user.name "Sonali Ronak Shah"
+          git config user.email "sonali.shah@gmx.de"
 
       - name: setup deployment
         run: |
