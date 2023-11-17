@@ -33,4 +33,4 @@ jobs:
           npm run build
           git add dist -f
           git commit -m "build files from github action"
-          git push https://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@github.com/sonali-shah/fitness-tracker.git -f
+          git push https://x-access-token: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@github.com/sonali-shah/fitness-tracker.git -f
