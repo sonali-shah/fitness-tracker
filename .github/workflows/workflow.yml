@@ -11,9 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
-    env:
-      GITHUB_TOKEN: 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
 
     strategy:
       matrix:
@@ -36,4 +33,4 @@ jobs:
           npm run build
           git add dist -f
           git commit -m "build files from github action"
-          git push https://$(GITHUB_TOKEN)@github.com/sonali-shah/fitness-tracker.git -f
+          git push https://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@github.com/sonali-shah/fitness-tracker.git -f
