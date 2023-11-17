@@ -8,15 +8,12 @@ on:
     branches:
       - "main"
 
-env:
-  USER_NAME: sonali-shah
-  USER_EMAIL: sonusukhadia@gmail.com
-  GITHUB_TOKEN: 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
-  REPO_NAME: fitness_tracker
-
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    env:
+      GITHUB_TOKEN: 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
 
     strategy:
       matrix:
@@ -28,8 +25,8 @@ jobs:
 
       - name: setup git config
         run: |
-          git config user.name $(USER_NAME)
-          git config user.email $(USER_EMAIL)
+          git config user.name "sonali-shah"
+          git config user.email "sonusukhadia@gmail.com"
 
       - name: setup deployment
         run: |
@@ -39,4 +36,4 @@ jobs:
           npm run build
           git add dist -f
           git commit -m "build files from github action"
-          git push https://$(GITHUB_TOKEN)@github.com/$(USER_NAME)/$(REPO_NAME).git -f
+          git push https://$(GITHUB_TOKEN)@github.com/sonali-shah/fitness-tracker.git -f
